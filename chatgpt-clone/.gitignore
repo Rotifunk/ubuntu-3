@@ -28,3 +28,28 @@ vite.config.ts.timestamp-*
 
 # Paraglide
 src/lib/paraglide
+
+# Drizzle ORM
+drizzle/
+migrations/
+
+# Playwright
+playwright-report/
+
+# Inlang
+project.inlang/cache/
+
+# Logs
+*.log
+
+# IDE - VSCode
+.vscode/
+
+# IDE - JetBrains
+.idea/
+
+# NPM config
+.npmrc
+
+# Test Coverage
+coverage/
