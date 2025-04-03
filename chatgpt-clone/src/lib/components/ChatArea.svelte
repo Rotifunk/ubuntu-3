@@ -94,6 +94,7 @@
 					<MessageBubble
 						role={message.role}
 						content={message.content}
+						messageId={message.id}
 					/>
 				</div>
 			{/each}

@@ -18,8 +18,9 @@ This project is a clone of the ChatGPT web user interface, built using SvelteKit
 *   **Message Handling:**
     *   Display user and bot messages in distinct bubbles.
     *   Send new messages using the input field (Enter key).
-    *   Real-time bot responses streamed from the Google Gemini API (`gemini-1.5-flash` model).
+    *   Real-time bot responses streamed from the Google Gemini API (`gemini-2.5-pro-exp-03-25` model).
     *   Markdown rendering for message content (using `marked` and `@tailwindcss/typography`).
+    *   Delete individual messages (user or bot) with a confirmation prompt (via hover button).
 *   **Persistence:**
     *   Chat sessions and messages are saved to an SQLite database (`sqlite.db`) using Drizzle ORM.
     *   Data persists across page reloads and application restarts (assuming the database file is persisted, e.g., via Docker volume).
