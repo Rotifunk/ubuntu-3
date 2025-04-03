@@ -1,8 +1,74 @@
 <script lang="ts">
 	import { marked } from 'marked'; // Import marked library
+	import hljs from 'highlight.js/lib/core';
+	import javascript from 'highlight.js/lib/languages/javascript';
+	import typescript from 'highlight.js/lib/languages/typescript';
+	import python from 'highlight.js/lib/languages/python';
+	import css from 'highlight.js/lib/languages/css';
+	import xml from 'highlight.js/lib/languages/xml'; // For HTML
+	import bash from 'highlight.js/lib/languages/bash';
 	import { onMount } from 'svelte'; // Import onMount for potential client-side only parsing if needed
 	import { deleteMessageClient, selectedChatId } from '$lib/stores/chatStore';
 	import { get } from 'svelte/store';
+
+	// Register highlight.js languages
+	hljs.registerLanguage('javascript', javascript);
+	hljs.registerLanguage('typescript', typescript);
+	hljs.registerLanguage('python', python);
+	hljs.registerLanguage('css', css);
+	hljs.registerLanguage('xml', xml); // HTML
+	hljs.registerLanguage('bash', bash);
+	hljs.registerLanguage('plaintext', (hljs) => ({ // Explicit plaintext
+	  name: 'Plain text',
+	  aliases: ['text'],
+	  disableAutodetect: true,
+	  contains: []
+	}));
+
+
+	// Configure marked to use highlight.js
+	const highlight = (code: string, lang: string) => {
+	  const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+	  try {
+	    // Use highlightAuto for automatic detection if lang is not provided or invalid,
+	    // but prefer explicit language if available.
+	    const result = language === 'plaintext' && !lang // If explicitly plaintext or no lang hint
+	      ? hljs.highlight(code, { language: 'plaintext', ignoreIllegals: true })
+	      : hljs.getLanguage(lang) // If lang hint is valid
+	        ? hljs.highlight(code, { language, ignoreIllegals: true })
+	        : hljs.highlightAuto(code); // Fallback to auto-detect if lang hint invalid
+
+	    // Add the language class for CSS styling
+	    return `<pre><code class="hljs ${result.language}">${result.value}</code></pre>`;
+	  } catch (e) {
+	    console.error(`Highlighting error for lang ${lang}:`, e);
+	    // Fallback to plaintext highlighting on error
+	    const fallbackResult = hljs.highlight(code, { language: 'plaintext', ignoreIllegals: true });
+	    return `<pre><code class="hljs plaintext">${fallbackResult.value}</code></pre>`;
+	  }
+	};
+
+	// Override the default renderer for code blocks
+	const renderer = new marked.Renderer();
+	// Adjust signature to match marked's expected type and add explicit types
+	renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
+	  // Marked might pass 'undefined' or an empty string if no language is specified
+	  const language = lang || 'plaintext';
+	  return highlight(text, language); // Use our highlight function with text and determined language
+	};
+
+	// Set options for marked globally or pass them to parse
+	// Passing to parse is generally safer in component context
+	const markedOptions = {
+	  renderer: renderer,
+	  pedantic: false,
+	  gfm: true,
+	  breaks: false,
+	  sanitize: false,
+	  smartLists: true,
+	  smartypants: false,
+	  xhtml: false
+	};
 
 	// Use export let for props instead of $props() rune
 	export let role: 'user' | 'assistant';
@@ -11,13 +77,12 @@
 
 	console.log('MessageBubble received props (export let):', { role, content, messageId }); // Log messageId too
 
-	// Parse markdown content to HTML
-	// Use Promise.resolve to handle potential async nature of marked or extensions
-	let parsedContent = Promise.resolve(marked.parse(content || '') as string);
+	// Parse markdown content to HTML using the configured options
+	let parsedContent = Promise.resolve(marked.parse(content || '', markedOptions) as string);
 
-	// Re-parse if content prop changes (though usually messages are immutable)
+	// Re-parse if content prop changes
 	$: if (content) {
-		parsedContent = Promise.resolve(marked.parse(content) as string);
+		parsedContent = Promise.resolve(marked.parse(content, markedOptions) as string);
 	}
 
 	// Determine alignment and color based on role
@@ -36,10 +101,11 @@
 	}
 </script>
 
-<div class="group relative {isUser ? 'text-right' : ''}"> <!-- Combined class and class: directive -->
+<!-- Removed conditional text-right alignment for the container -->
+<div class="group relative">
 	<div
-		class={`message-content inline-block p-3 rounded-lg max-w-xl text-white ${
-			isUser ? 'bg-blue-600' : 'bg-gray-700'
+		class={`message-content inline-block p-3 rounded-lg max-w-4xl text-white ${ // Increased max-width
+			isUser ? 'bg-[#3a312a]' : 'bg-[#2a221a]' // User: #3a312a, Assistant: #2a221a (slightly darker than chat area)
 		}`}
 	>
 		{#await parsedContent}
@@ -47,7 +113,9 @@
 		{:then htmlContent}
 			<!-- Render the parsed HTML content -->
 			<!-- Use a container div for styling markdown elements -->
-			<div class="prose prose-sm prose-invert max-w-none">
+			<!-- Changed prose-sm to prose-base for larger text -->
+			<!-- Applied custom text color -->
+			<div class="prose prose-base prose-invert max-w-none text-[#d7c0a3] prose-strong:text-[#b08354]">
 				{@html htmlContent}
 			</div>
 		{:catch error}
@@ -58,9 +126,7 @@
 	<!-- Delete Button - appears on hover -->
 	<button
 		onclick={handleDelete}
-		class="absolute top-0 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-		class:right-0={isUser}
-		class:left-0={!isUser}
+		class="absolute top-0 right-0 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
 		aria-label="Delete message"
 		title="Delete message"
 	>
@@ -71,16 +137,19 @@
 </div>
 
 <style>
-	/* Add custom styles for markdown elements if needed */
+	/* Remove default prose pre/code styling as highlight.js handles it */
+	/* Keep the overflow style */
 	.message-content :global(pre) {
-		background-color: rgba(0, 0, 0, 0.2);
-		padding: 0.5rem;
-		border-radius: 0.25rem;
 		overflow-x: auto;
+		background-color: #0d1117;
+		/* padding: 0; Remove padding, let hljs theme handle it */
+		border-radius: 0.65rem; /* Keep or adjust radius */
 	}
-    .message-content :global(code) {
-        font-size: 0.875em; /* Adjust code font size */
-    }
+	/* Remove prose code styling */
+    /* .message-content :global(code) { */
+        /* font-size: 0.875em; Let hljs theme handle font size */
+    /* } */
+
     /* Ensure prose styles don't override basic bubble layout */
     .prose {
         max-width: none; /* Override default prose max-width */

@@ -6,8 +6,8 @@
 	import type { Message } from '$lib/stores/chatStore'; // Import the correct Message type
 
 	let chatContainerElement: HTMLDivElement | null = null;
-	let shouldScroll = true;
-	let isBotResponding = false; // Used for the "Bot is typing..." indicator
+	let shouldScroll = $state(true); // Use $state for reactivity
+	let isBotResponding = $state(false); // Use $state for reactivity
 	let lastMessageCount = 0;
 
 	// Make handleSendMessage async to await addMessageClient
@@ -81,16 +81,17 @@
 
 </script>
 
-<div class="flex flex-col h-full bg-gray-900">
+<div class="flex flex-col h-full bg-[#2e261f]">
 	<!-- Message List Area - Use the derived store directly -->
 	<div
 		class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth"
 		bind:this={chatContainerElement}
-		on:scroll={handleScroll}
+		onscroll={handleScroll}
 	>
 		{#if $currentChatMessages.length > 0}
 			{#each $currentChatMessages as message (message.id)}
-				<div class="message-bubble">
+				<!-- Wrapper div for alignment -->
+				<div class="message-bubble flex" class:justify-end={message.role === 'user'}>
 					<MessageBubble
 						role={message.role}
 						content={message.content}

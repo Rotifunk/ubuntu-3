@@ -56,12 +56,26 @@
 
 </script>
 
-<div class="flex h-screen bg-gray-900 text-white">
-	<!-- Pass loaded sessions to Sidebar if needed, or let Sidebar use the store -->
+<!-- 
+  The main layout structure. 
+  The Sidebar component now handles both desktop and mobile views (including the mobile header).
+-->
+<!-- Apply new background color, assuming dark mode is the primary target -->
+<div class="flex flex-col md:flex-row h-screen bg-[#2e261f] text-white">
+	<!-- 
+    The Sidebar component itself contains the logic for desktop (hover-expand) 
+    and mobile (header button + overlay). 
+    It needs to be part of the flex layout.
+  -->
 	<Sidebar />
 
 	<!-- Main Content Area -->
 	<div class="flex-1 flex flex-col overflow-hidden">
+		<!-- 
+      The mobile header is now *inside* Sidebar.svelte, 
+      so it's removed from here. The main content area just needs 
+      to render the page content.
+    -->
 		<!-- Header (optional) -->
 		<!-- <header class="bg-gray-700 p-4 shadow-md">Header</header> -->
 

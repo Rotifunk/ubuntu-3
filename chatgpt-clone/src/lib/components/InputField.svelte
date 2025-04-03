@@ -66,12 +66,12 @@
 </script>
 
 <!-- Input Field Area -->
-<div class="p-4 border-t border-gray-700 bg-gray-900">
-	<div class="bg-gray-700 rounded-lg p-2 flex items-end">
+<div class="p-4 border-t border-neutral-700 bg-[#2e261f]">
+	<div class="bg-[#30302e] rounded-lg p-2 flex items-end">
 		<textarea
 			bind:this={textareaElement}
 			placeholder="Send a message..."
-			class="flex-1 bg-transparent focus:outline-none px-2 text-white resize-none overflow-y-hidden max-h-40"
+			class="flex-1 bg-transparent focus:outline-none px-2 text-white resize-none overflow-y-hidden max-h-40 focus:ring-0 focus:ring-1 focus:ring-[#c96442]"
 			bind:value={message}
 			on:input={handleInput}
 			on:keydown={handleKeydown}
