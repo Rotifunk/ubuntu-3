@@ -1,3 +1,18 @@
+/* Import Noto Sans KR font (Medium 500 weight) - Ensure this is first */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap');
+
+/* Import Tailwind base, components, and utilities */
 @import 'tailwindcss';
+
+/* Add Tailwind plugins */
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Import highlight.js theme (e.g., github-dark) */
+@import 'highlight.js/styles/github-dark.css';
+
+/* Apply Noto Sans KR globally */
+body {
+	font-family: 'Noto Sans KR', sans-serif;
+	/* You might want to adjust line-height or other properties here too */
+}

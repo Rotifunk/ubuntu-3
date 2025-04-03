@@ -48,31 +48,34 @@
 		//    // Decide how to merge or reset based on application logic
 		// }
 
-		// --- Logic to ensure selectedChatId remains valid on subsequent data changes ---
-		// This part runs *after* initialization if `data.chatSessions` changes again.
-		// It should also call selectChat if the selection becomes invalid.
-		if (initialized) {
-			const loadedSessions = data.chatSessions || []; // Get latest loaded sessions
-			const currentSelected = $selectedChatId; // Read reactive value for subsequent checks
-
-			if (currentSelected && !loadedSessions.some(s => s.id === currentSelected)) {
-				// If current selection becomes invalid later, select the first available
-				console.log('Layout effect: Selected chat became invalid, selecting first available.');
-				selectChat(loadedSessions[0]?.id ?? null);
-			}
-			// No need to select if !currentSelected here, as initial load handled it.
-            // If the list becomes empty, selectChat(null) will be called inside the check above.
-		}
+		// REMOVED: Post-initialization selection logic.
+		// This logic was causing issues with race conditions when adding new chats.
+		// Selection changes should now be handled explicitly within the store functions
+		// like addNewChatClient and deleteChatClient.
 	});
 
 </script>
 
-<div class="flex h-screen bg-gray-900 text-white">
-	<!-- Pass loaded sessions to Sidebar if needed, or let Sidebar use the store -->
+<!-- 
+  The main layout structure. 
+  The Sidebar component now handles both desktop and mobile views (including the mobile header).
+-->
+<!-- Apply new background color, assuming dark mode is the primary target -->
+<div class="flex flex-col md:flex-row h-screen bg-[#2e261f] text-white">
+	<!-- 
+    The Sidebar component itself contains the logic for desktop (hover-expand) 
+    and mobile (header button + overlay). 
+    It needs to be part of the flex layout.
+  -->
 	<Sidebar />
 
 	<!-- Main Content Area -->
 	<div class="flex-1 flex flex-col overflow-hidden">
+		<!-- 
+      The mobile header is now *inside* Sidebar.svelte, 
+      so it's removed from here. The main content area just needs 
+      to render the page content.
+    -->
 		<!-- Header (optional) -->
 		<!-- <header class="bg-gray-700 p-4 shadow-md">Header</header> -->
 

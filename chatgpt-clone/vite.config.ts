@@ -17,6 +17,9 @@ export default defineConfig({
 		port: 8000, // Set the port to 8000
 		host: true // Allow access from network (useful for containers)
 	},
+	ssr: { // Add SSR configuration
+		noExternal: ['lucide-svelte'] // Force bundling lucide-svelte for SSR
+	},
 	test: {
 		workspace: [
 			{

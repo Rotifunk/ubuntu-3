@@ -56,8 +56,10 @@
 		"@node-rs/argon2": "^2.0.2",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
+		"@types/highlight.js": "^9.12.4",
 		"@types/marked": "^5.0.2",
 		"drizzle-orm": "^0.40.0",
+		"highlight.js": "^11.11.1",
 		"marked": "^15.0.7",
 		"nanoid": "^5.1.5"
 	}
