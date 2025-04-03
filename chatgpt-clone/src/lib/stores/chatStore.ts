@@ -42,14 +42,18 @@ export async function loadChatSessions() {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 		const sessions: ChatSession[] = await response.json();
+		console.log('[Load Sessions] Fetched sessions:', sessions.map(s => s.id));
 		chatSessions.set(sessions);
 
-        const currentSelected = get(selectedChatId);
-        if (!currentSelected && sessions.length > 0) {
-            selectChat(sessions[0].id);
-        } else if (currentSelected && !sessions.some(s => s.id === currentSelected)) {
-            selectChat(sessions[0]?.id ?? null);
-        }
+		// Remove automatic selection logic from here.
+		// Selection should be handled explicitly where needed (e.g., initial load, add/delete).
+		// const currentSelected = get(selectedChatId);
+        // if (!currentSelected && sessions.length > 0) {
+        //     selectChat(sessions[0].id);
+        // } else if (currentSelected && !sessions.some(s => s.id === currentSelected)) {
+		// 	console.warn('loadChatSessions: Selected chat became invalid, selecting first available.');
+        //     selectChat(sessions[0]?.id ?? null);
+        // }
 
 	} catch (error) {
 		console.error('Failed to load chat sessions:', error);
@@ -100,19 +104,17 @@ export async function addNewChatClient(title: string = 'New Chat') {
 
 		const newSession: ChatSession = await response.json();
 
-		// Update the store ONLY after successful API call
-		chatSessions.update(sessions => {
-			// Add the new session and sort by createdAt descending (newest first)
-			const updatedSessions = [newSession, ...sessions];
-			// Compare createdAt strings directly
-			updatedSessions.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-			return updatedSessions;
-		});
+		// Explicitly reload sessions to ensure the new one is included
+		// This prevents a race condition where automatic invalidation might load
+		// the list before the new chat is available, causing selection issues.
+		console.log('[Add New Chat] Reloading chat sessions after creation...');
+		await loadChatSessions();
 
-		// Select the newly added chat
+		// Now that the list is updated (by loadChatSessions), select the newly added chat
+		console.log('[Add New Chat] Selecting newly created chat:', newSession.id);
 		selectChat(newSession.id);
 
-        console.log('Successfully added new chat and selected:', newSession);
+        console.log('[Add New Chat] Successfully added new chat, reloaded list, and selected:', newSession);
 
 	} catch (error) {
 		console.error('Failed to add new chat:', error);

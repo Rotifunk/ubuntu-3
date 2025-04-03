@@ -48,21 +48,10 @@
 		//    // Decide how to merge or reset based on application logic
 		// }
 
-		// --- Logic to ensure selectedChatId remains valid on subsequent data changes ---
-		// This part runs *after* initialization if `data.chatSessions` changes again.
-		// It should also call selectChat if the selection becomes invalid.
-		if (initialized) {
-			const loadedSessions = data.chatSessions || []; // Get latest loaded sessions
-			const currentSelected = $selectedChatId; // Read reactive value for subsequent checks
-
-			if (currentSelected && !loadedSessions.some(s => s.id === currentSelected)) {
-				// If current selection becomes invalid later, select the first available
-				console.log('Layout effect: Selected chat became invalid, selecting first available.');
-				selectChat(loadedSessions[0]?.id ?? null);
-			}
-			// No need to select if !currentSelected here, as initial load handled it.
-            // If the list becomes empty, selectChat(null) will be called inside the check above.
-		}
+		// REMOVED: Post-initialization selection logic.
+		// This logic was causing issues with race conditions when adding new chats.
+		// Selection changes should now be handled explicitly within the store functions
+		// like addNewChatClient and deleteChatClient.
 	});
 
 </script>
